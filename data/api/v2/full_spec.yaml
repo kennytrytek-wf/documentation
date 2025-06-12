@@ -139,6 +139,13 @@ components:
       required: true
       schema:
         type: string
+    ApplicationKeyId:
+      description: The ID of the app key
+      in: path
+      name: app_key_id
+      required: true
+      schema:
+        type: string
     ApplicationKeyIncludeParameter:
       description: Resource path for related resources to include in the response.
         Only `owned_by` is supported.
@@ -2386,6 +2393,26 @@ components:
       type: string
       x-enum-varnames:
       - DEPLOYMENT
+    AppKeyRegistrationData:
+      description: Data related to the app key registration.
+      properties:
+        id:
+          description: The app key registration identifier
+          readOnly: true
+          type: string
+        type:
+          $ref: '#/components/schemas/AppKeyRegistrationDataType'
+      required:
+      - type
+      type: object
+    AppKeyRegistrationDataType:
+      description: The definition of `AppKeyRegistrationDataType` object.
+      enum:
+      - app_key_registration
+      example: app_key_registration
+      type: string
+      x-enum-varnames:
+      - APP_KEY_REGISTRATION
     AppMeta:
       description: Metadata of an app.
       properties:
@@ -15992,6 +16019,12 @@ components:
         data:
           $ref: '#/components/schemas/ActionConnectionData'
       type: object
+    GetAppKeyRegistrationResponse:
+      description: The response object after getting an app key registration.
+      properties:
+        data:
+          $ref: '#/components/schemas/AppKeyRegistrationData'
+      type: object
     GetAppResponse:
       description: The full app definition response object.
       properties:
@@ -19760,6 +19793,32 @@ components:
         total_count:
           description: Total number of items.
           example: 35
+          format: int64
+          type: integer
+      type: object
+    ListAppKeyRegistrationsResponse:
+      description: A paginated list of app key registrations.
+      properties:
+        data:
+          description: An array of app key registrations.
+          items:
+            $ref: '#/components/schemas/AppKeyRegistrationData'
+          type: array
+        meta:
+          $ref: '#/components/schemas/ListAppKeyRegistrationsResponseMeta'
+      type: object
+    ListAppKeyRegistrationsResponseMeta:
+      description: The definition of `ListAppKeyRegistrationsResponseMeta` object.
+      properties:
+        total:
+          description: The total number of app key registrations.
+          example: 1
+          format: int64
+          type: integer
+        total_filtered:
+          description: The total number of app key registrations that match the specified
+            filters.
+          example: 1
           format: int64
           type: integer
       type: object
@@ -29693,6 +29752,12 @@ components:
       x-enum-varnames:
       - ANY
       - ALL
+    RegisterAppKeyResponse:
+      description: The response object after creating an app key registration.
+      properties:
+        data:
+          $ref: '#/components/schemas/AppKeyRegistrationData'
+      type: object
     RelationAttributes:
       description: Relation attributes.
       properties:
@@ -41900,6 +41965,205 @@ info:
   version: '1.0'
 openapi: 3.0.0
 paths:
+  /api/v2/actions/app_key_registrations:
+    get:
+      description: List App Key Registrations
+      operationId: ListAppKeyRegistrations
+      parameters:
+      - description: The number of App Key Registrations to return per page.
+        in: query
+        name: page[size]
+        required: false
+        schema:
+          format: int64
+          type: integer
+      - description: The page number to return.
+        in: query
+        name: page[number]
+        required: false
+        schema:
+          format: int64
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListAppKeyRegistrationsResponse'
+          description: Successfully listed App Key Registrations
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JSONAPIErrorResponse'
+          description: Bad request
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JSONAPIErrorResponse'
+          description: Forbidden
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JSONAPIErrorResponse'
+          description: Too many requests
+      summary: List App Key Registrations
+      tags:
+      - Action Connection
+      x-menu-order: 6
+      x-permission:
+        operator: OR
+        permissions:
+        - org_app_keys_read
+      x-undo:
+        type: safe
+      x-unstable: '**Note**: This endpoint is in public beta. It is not yet required
+        to register your App Builder, Action Connection, or Workflow Automation app
+        keys.'
+  /api/v2/actions/app_key_registrations/{app_key_id}:
+    delete:
+      description: Unregister an App Key
+      operationId: UnregisterAppKey
+      parameters:
+      - $ref: '#/components/parameters/ApplicationKeyId'
+      responses:
+        '204':
+          description: Successfully Unregistered an App Key
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JSONAPIErrorResponse'
+          description: Bad request
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JSONAPIErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JSONAPIErrorResponse'
+          description: Not found
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JSONAPIErrorResponse'
+          description: Too many requests
+      summary: Unregister an App Key
+      tags:
+      - Action Connection
+      x-menu-order: 7
+      x-permission:
+        operator: OR
+        permissions:
+        - user_access_manage
+        - user_app_keys
+        - service_account_write
+      x-undo:
+        type: idempotent
+      x-unstable: '**Note**: This endpoint is in public beta. It is not yet required
+        to register your App Builder, Action Connection, or Workflow Automation app
+        keys.'
+    get:
+      description: Get an existing App Key Registration
+      operationId: GetAppKeyRegistration
+      parameters:
+      - $ref: '#/components/parameters/ApplicationKeyId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAppKeyRegistrationResponse'
+          description: Successfully got an App Key Registration
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JSONAPIErrorResponse'
+          description: Bad request
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JSONAPIErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JSONAPIErrorResponse'
+          description: Not found
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JSONAPIErrorResponse'
+          description: Too many requests
+      summary: Get an existing App Key Registration
+      tags:
+      - Action Connection
+      x-menu-order: 8
+      x-permission:
+        operator: OR
+        permissions:
+        - org_app_keys_read
+      x-undo:
+        type: safe
+      x-unstable: '**Note**: This endpoint is in public beta. It is not yet required
+        to register your App Builder, Action Connection, or Workflow Automation app
+        keys.'
+    put:
+      description: Register a new App Key
+      operationId: RegisterAppKey
+      parameters:
+      - $ref: '#/components/parameters/ApplicationKeyId'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterAppKeyResponse'
+          description: Successfully registered an App Key
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JSONAPIErrorResponse'
+          description: Bad request
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JSONAPIErrorResponse'
+          description: Forbidden
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JSONAPIErrorResponse'
+          description: Too many requests
+      summary: Register a new App Key
+      tags:
+      - Action Connection
+      x-menu-order: 5
+      x-permission:
+        operator: OR
+        permissions:
+        - user_access_manage
+        - user_app_keys
+        - service_account_write
+      x-undo:
+        type: idempotent
+      x-unstable: '**Note**: This endpoint is in public beta. It is not yet required
+        to register your App Builder, Action Connection, or Workflow Automation app
+        keys.'
   /api/v2/actions/connections:
     post:
       description: Create a new Action Connection

@@ -1,4 +1,20 @@
 {
+  "ListAppKeyRegistrations": {
+    "description": "List App Key Registrations",
+    "summary": "List App Key Registrations"
+  },
+  "UnregisterAppKey": {
+    "description": "Unregister an App Key",
+    "summary": "Unregister an App Key"
+  },
+  "GetAppKeyRegistration": {
+    "description": "Get an existing App Key Registration",
+    "summary": "Get an existing App Key Registration"
+  },
+  "RegisterAppKey": {
+    "description": "Register a new App Key",
+    "summary": "Register a new App Key"
+  },
   "CreateActionConnection": {
     "description": "Create a new Action Connection",
     "summary": "Create a new Action Connection",
